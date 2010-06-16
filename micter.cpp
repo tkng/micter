@@ -305,7 +305,7 @@ namespace micter {
   }
 
 
-  satic void inline
+  void
   generate_trigram_fv(const vector<string> &chars, size_t center, fv_t *fv) {
     string f = string("E");
 
