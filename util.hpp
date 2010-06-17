@@ -35,6 +35,10 @@ string_join(const std::vector<std::string> &ss);
 std::vector<std::string>
 string_to_chars(const std::string &s);
 
+// return start positions of each character.
+std::vector<std::size_t>
+string_start_poss(const std::string &s);
+
 size_t
 string_utf8_next_pos(const std::string &s, const size_t pos);
 

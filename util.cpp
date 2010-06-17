@@ -102,6 +102,26 @@ string_to_chars(const string &s)
   return chars;
 }
 
+vector<size_t>
+string_start_poss(const string &s)
+{
+  vector<size_t> positions;
+  size_t s_size = s.size();
+  size_t i = 0;
+
+  while (i < s_size) {
+    unsigned char c = s[i];
+    int char_len = utf8_len_data[c];
+    positions.push_back(i);
+    i += char_len;
+  }
+
+  // need to know length of last character.
+  positions.push_back(i);
+
+  return positions;
+}
+
 size_t
 string_utf8_next_pos(const string &s, const size_t pos)
 {
