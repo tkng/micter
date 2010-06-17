@@ -97,11 +97,13 @@ namespace micter {
     
     for (size_t i = 0; i < fv.size(); i++) {
       string key = fv[i].first;
-      if (last_update.find(key) != last_update.end()) {
-        int c = exampleN - last_update[key];
-        last_update[key] = exampleN;
+      unordered_map<string, int>::iterator uit = last_update.find(key);
+      if (uit != last_update.end()) {
+        int c = exampleN - uit->second;
+        uit->second = exampleN;
         
-        w[key] = clip_by_zero(w[key], lambda * c);
+        unordered_map<string, float>::iterator wit = w.find(key);
+        wit->second = clip_by_zero(wit->second, lambda * c);
       } else {
         int c = exampleN;
         last_update[key] = exampleN;
