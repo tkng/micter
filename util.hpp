@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include <string>
 #include <vector>
 #include <limits.h>
@@ -38,3 +40,57 @@ string_utf8_next_pos(const std::string &s, const size_t pos);
 
 size_t
 string_utf8_length(const std::string &s);
+
+class feature {
+private:
+
+public:
+  const char *str_;
+  int ftype_;
+  size_t len_;
+
+  feature(int ftype, const char *str, int len):
+    str_(str),
+    ftype_(ftype),
+    len_(len)
+  {
+  }
+
+};
+
+
+struct feature_equal_to
+{
+  bool
+  operator()(const feature x, const feature y) const
+  {
+    if (x.ftype_ == y.ftype_ && x.len_ == y.len_) {
+      if (memcmp(x.str_, y.str_, x.len_) == 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+struct feature_hash
+{
+  size_t
+  operator()(feature val) const
+  {
+    size_t __length = val.len_;
+    const char *__first = val.str_;
+    
+    size_t __result = static_cast<size_t>(2166136261UL);
+    __result ^= static_cast<size_t>(val.ftype_);
+    __result *= static_cast<size_t>(16777619UL);
+    
+    for (; __length > 0; --__length)
+      {
+        __result ^= static_cast<size_t>(*__first++);
+        __result *= static_cast<size_t>(16777619UL);
+      }
+    return __result;
+  }
+  
+};
