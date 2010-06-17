@@ -49,17 +49,39 @@ class feature {
 private:
 
 public:
-  const char *str_;
+  char *str_;
   int ftype_;
   size_t len_;
+  bool copy_;
 
   feature(int ftype, const char *str, int len):
-    str_(str),
     ftype_(ftype),
-    len_(len)
+    len_(len),
+    copy_(false)
   {
+    if (copy_) {
+      str_ = strndup(str, len);
+    } else {
+      str_ = const_cast<char *>(str);
+    }      
   }
-
+#define UNUSED_ARGUMENT(x) (void)x
+  feature(int ftype, char *str, int len, bool copy):
+    ftype_(ftype),
+    len_(len),
+    copy_(true)
+  {
+    UNUSED_ARGUMENT(copy);
+    str_ = strndup(str, len);
+  }
+  
+  ~feature()
+  {
+    if (copy_) {
+      free(str_);
+    }
+  }
+  
 };
 
 
