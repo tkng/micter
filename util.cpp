@@ -145,3 +145,8 @@ string_utf8_length(const string &s)
   return len;
 }
 
+ostream& operator<<(ostream &out, const feature &x)
+{
+  out << x.ftype_ << string(x.str_, x.len_);
+  return out;
+}

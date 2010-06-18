@@ -68,9 +68,9 @@ namespace micter {
     float m = 0.0;
     size_t fv_size = fv.size();
     for (size_t i = 0; i < fv_size; i++) {
-      string key = fv[i].first;
+      feature key = fv[i].first;
       float x_i = fv[i].second;
-      unordered_map<string, float>::iterator wit = w.find(key);
+      unordered_map<feature, float>::iterator wit = w.find(key);
       if (wit != w.end()) {
         //       m +=  x_i * w[key];
         m +=  x_i * wit->second;
@@ -81,14 +81,15 @@ namespace micter {
 
   void SVM::muladd(const fv_t &fv, const int y, float scale) {
     for (size_t i = 0; i < fv.size(); i++) {
-      string key = fv[i].first;
+      feature key = fv[i].first;
       float x_i = fv[i].second;
-      //      unordered_map<string, float>::iterator wit = w.find(key);      
 
-      if (w.find(key) != w.end()) {
-        w[key] += y * x_i * scale;
+      unordered_map<feature, float>::iterator wit = w.find(key);
+      if (wit != w.end()) {
+        wit->second += y * x_i * scale;
       } else {
-        w[key] = y * x_i * scale;
+        feature key_ = feature(key.ftype_, key.str_, key.len_, true);
+        w[key_] = y * x_i * scale;
       }
     }
   }
@@ -96,18 +97,19 @@ namespace micter {
   void SVM::l1_regularize(const fv_t& fv) {
     
     for (size_t i = 0; i < fv.size(); i++) {
-      string key = fv[i].first;
-      unordered_map<string, int>::iterator uit = last_update.find(key);
+      feature key = fv[i].first;
+      unordered_map<feature, int>::iterator uit = last_update.find(key);
       if (uit != last_update.end()) {
         int c = exampleN - uit->second;
         uit->second = exampleN;
         
-        unordered_map<string, float>::iterator wit = w.find(key);
+        unordered_map<feature, float>::iterator wit = w.find(key);
         wit->second = clip_by_zero(wit->second, lambda * c);
       } else {
         int c = exampleN;
-        last_update[key] = exampleN;
-        w[key] = clip_by_zero(w[key], lambda * c);    
+        feature key_ = feature(key.ftype_, key.str_, key.len_, true);
+        last_update[key_] = exampleN;
+        w[key_] = clip_by_zero(w[key_], lambda * c);    
       }
     }
   }
@@ -134,7 +136,10 @@ namespace micter {
       vector<string> a;
       string_split(line, '\t', 2, &a);
       double val = strtod(a[1].c_str(), NULL);
-      w[a[0]] = val;
+      //      cout << line << " " <<a[0] << endl;
+      //      cout << line[0] << a[0].substr(1).c_str() << " " << a[0].size() -1<< endl;
+      feature f(line[0], a[0].substr(1).c_str(), a[0].size() -1, true);
+      w[f] = val;
     }
     return 0;
   }
@@ -145,9 +150,9 @@ namespace micter {
       return -1;
     }
 
-    unordered_map<string, float>::iterator it;
+    unordered_map<feature, float>::iterator it;
     for (it = w.begin(); it != w.end(); it++) {
-      string key = it->first;
+      feature key = it->first;
       if (last_update.find(key) != last_update.end()) {
         int c = exampleN - last_update[key];
         last_update[key] = exampleN;
@@ -267,77 +272,97 @@ namespace micter {
   }
 
   void
-  generate_bigram_fv(const vector<string> &chars, size_t center, fv_t *fv) {
-    string f = string("A");
+  generate_bigram_fv(const char *str, vector<size_t> &positions, 
+                     size_t center, fv_t *fv) {
+    size_t start_pos, end_pos;
     if (center >= 1) {
-      f += chars[center-1];
+      start_pos = positions[center-1];
+    } else {
+      start_pos = positions[center];
     }
-    f += chars[center];
+    if (center < positions[positions.size()-1]) {
+      end_pos = positions[center+1];
+    } else {
+      end_pos = positions[center];
+    }
+    feature f('A', str + start_pos, end_pos - start_pos);
+
     fv->push_back(make_pair(f, 1.0));
   }
 
-  // type = letter type like hiragana, katakana, alphabets.
+  // // type = letter type like hiragana, katakana, alphabets.
+  // void
+  // generate_type_bigram_fv(const vector<char> &char_types, size_t center, fv_t *fv) {
+  //   string f = string("B");
+  //   if (center >= 2) {
+  //     f += char_types[center-2];
+  //   }
+  //   if (center >= 1) {
+  //     f += char_types[center-1];
+  //   }
+  //   f += char_types[center];
+  //   fv->push_back(make_pair(f, 1.0));
+  // }
+
+  // // type = letter type like hiragana, katakana, alphabets.
+  // void
+  // generate_char_type_bigram_fv(const vector<string> &chars, const vector<char> &char_types,
+  //                              size_t center, fv_t *fv) {
+  //   string f1 = string("C");
+  //   string f2 = string("D");
+  //   if (center >= 1) {
+  //     f1 += char_types[center-1];
+  //     f2 += chars[center-1];
+  //   }
+  //   f1 += chars[center];
+  //   f2 += char_types[center];
+  //   fv->push_back(make_pair(f1, 1.0));
+  //   fv->push_back(make_pair(f2, 1.0));
+  // }
+
   void
-  generate_type_bigram_fv(const vector<char> &char_types, size_t center, fv_t *fv) {
-    string f = string("B");
+  generate_trigram_fv(const char *str, vector<size_t> &positions, 
+                      size_t center, fv_t *fv) {
+    size_t start_pos, end_pos;
     if (center >= 2) {
-      f += char_types[center-2];
+      start_pos = positions[center-2];
+    } else if (center == 1) {
+      start_pos = positions[center-1];
+    } else {
+      start_pos = positions[center];
     }
-    if (center >= 1) {
-      f += char_types[center-1];
+
+    if (center < positions[positions.size()-1]) {
+      end_pos = positions[center+1];
+    } else {
+      end_pos = positions[center];
     }
-    f += char_types[center];
+
+    feature f('E', str + start_pos, end_pos - start_pos);
+
     fv->push_back(make_pair(f, 1.0));
   }
-
-  // type = letter type like hiragana, katakana, alphabets.
-  void
-  generate_char_type_bigram_fv(const vector<string> &chars, const vector<char> &char_types,
-                               size_t center, fv_t *fv) {
-    string f1 = string("C");
-    string f2 = string("D");
-    if (center >= 1) {
-      f1 += char_types[center-1];
-      f2 += chars[center-1];
-    }
-    f1 += chars[center];
-    f2 += char_types[center];
-    fv->push_back(make_pair(f1, 1.0));
-    fv->push_back(make_pair(f2, 1.0));
-  }
-
-
-  void
-  generate_trigram_fv(const vector<string> &chars, size_t center, fv_t *fv) {
-    string f = string("E");
-
-    if (center >= 2) {
-      f += chars[center-2];
-    }
-
-    if (center >= 1) {
-      f += chars[center-1];
-    }
-    f += chars[center];
-    fv->push_back(make_pair(f, 1.0));
-  }
-
   
   fv_t
-  generate_fv(const vector<string> &chars, const vector<char> &char_types, size_t center) {
+  generate_fv(const char *str, vector<size_t> &positions,
+              const vector<char> &char_types, size_t center) {
     fv_t fv;
-    size_t cs_size = chars.size();
+
+    size_t cs_size = positions.size()-1;
+
     int j = 0;
     for (size_t i = max((size_t)0, center - 2); i < min(cs_size, center+2); i++) {
-      string f;
-      f += feature_prefix[j];
-      f += chars[i];
+      size_t start_pos, end_pos;
+      start_pos = positions[i];
+      end_pos = positions[i+1];
+      feature f(feature_prefix[j], str + start_pos, end_pos - start_pos);
       fv.push_back(make_pair(f, 1.0));
       j++;
     }
-    generate_bigram_fv(chars, center, &fv);
-    generate_char_type_bigram_fv(chars, char_types, center, &fv);
-    generate_type_bigram_fv(char_types, center, &fv);
+    generate_bigram_fv(str, positions, center, &fv);
+    generate_trigram_fv(str, positions, center, &fv);
+    //    generate_char_type_bigram_fv(chars, char_types, center, &fv);
+    //    generate_type_bigram_fv(char_types, center, &fv);
     //    generate_trigram_fv(chars, center, &fv);
 
     return fv;
@@ -370,17 +395,22 @@ namespace micter {
 
   int micter::split(const string &line, vector<string> *result) {
     vector<string> chars = string_to_chars(line);
-    vector<char> char_types = chars_to_types(chars);
+    vector<char> char_types; // = chars_to_types(chars);
+    vector<size_t> positions = string_start_poss(line);
+    // FIXME: use smart pointer for Exception Safety.
+    char *str = strdup(line.c_str());
+
     vector<int> cut_pos;
 
-    size_t cs_size = chars.size();
+    size_t cs_size = positions.size()-1;
     for (size_t i = 0; i < cs_size; i++) {
-      fv_t fv = generate_fv(chars, char_types, i);
+      fv_t fv = generate_fv(str, positions, char_types, i);
       if (svm.dotproduct(fv) >= 0.0) {
         cut_pos.push_back(i);
       }
     }
     
+    free(str);
     vector<string> tmp = chars_to_words(chars, cut_pos);
     *result = tmp;
     return 0;
@@ -388,15 +418,17 @@ namespace micter {
 
   int micter::train_sentence(const vector<string> &words) {
     string sentence = string_join(words);
-    vector<string> chars = string_to_chars(sentence);
-    vector<char> char_types = chars_to_types(chars);
+    vector<size_t> positions = string_start_poss(sentence);
+    vector<char> char_types;// = chars_to_types(chars);
     vector<size_t> cuts = calc_cut_pos(words);
+    // FIXME: use smart pointer for Exception Safety.
+    char *str = strdup(sentence.c_str());
     
-    size_t cs_size = chars.size();
+    size_t cs_size = positions.size()-1;
     for (size_t i = 0; i < cs_size; i++) {
       int y;
       fv_t fv;
-      fv = generate_fv(chars, char_types, i);
+      fv = generate_fv(str, positions, char_types, i);
       
       if (cuts.size() > 0 && cuts[0] == i) {
         y = 1;
@@ -415,21 +447,26 @@ namespace micter {
 
       svm.trainExample(fv, y);
     }
+    free(str);
     return 0;
   }
 
   int micter::test_sentence(const vector<string> &words,
                             int *tp, int *tn, int *fp, int *fn) {
     string sentence = string_join(words);
-    vector<string> chars = string_to_chars(sentence);
-    vector<char> char_types = chars_to_types(chars);
+    vector<string> chars;// = string_to_chars(sentence);
+    vector<char> char_types; // = chars_to_types(chars);
     vector<size_t> cuts = calc_cut_pos(words);
+    vector<size_t> positions = string_start_poss(sentence);
+    char *str = strdup(sentence.c_str());
 
-    size_t cs_size = chars.size();
+    //    size_t cs_size = string_utf8_length(sentence);
+    size_t cs_size = positions.size()-1;
+    //    cout << chars.size() << "  " << positions.size() << endl;
     for (size_t i = 0; i < cs_size; i++) {
       int y;
       fv_t fv;
-      fv = generate_fv(chars, char_types, i);
+      fv = generate_fv(str, positions, char_types, i);
       
       if (cuts.size() > 0 && cuts[0] == i) {
         y = 1;
@@ -454,7 +491,7 @@ namespace micter {
         }
       }
     }
-    
+    free(str);
     return 0;
 
   }

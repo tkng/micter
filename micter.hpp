@@ -23,6 +23,8 @@
 #include <string>
 #include <tr1/unordered_map>
 
+#include "util.hpp"
+
 // References
 
 // - Cumulative Regularization Term Update
@@ -30,14 +32,14 @@
 
 namespace micter
 {
-  typedef std::vector<std::pair<std::string, double> > fv_t;
+  typedef std::vector<std::pair<feature, double> > fv_t;
 
   // Support Vector Machine with L1 or L2 regularization.
   // Training algorithm is FOBOS.
   class SVM {
   private:
-    std::tr1::unordered_map<std::string, float> w;
-    std::tr1::unordered_map<std::string, int> last_update;
+    std::tr1::unordered_map<feature, float, feature_hash, feature_equal_to> w;
+    std::tr1::unordered_map<feature, int, feature_hash, feature_equal_to> last_update;
 
     float clip_by_zero(float a, float b) const;
     void muladd(const fv_t &fv, const int y, float scale);

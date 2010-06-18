@@ -24,6 +24,9 @@
 #include <string>
 #include <vector>
 #include <limits.h>
+#include <iostream>
+#include <fstream>
+#include <ostream>
 
 int
 string_split(const std::string &s, const char needle, int max_num,
@@ -50,11 +53,13 @@ private:
 
 public:
   char *str_;
-  int ftype_;
+  char ftype_;
   size_t len_;
   bool copy_;
 
-  feature(int ftype, const char *str, int len):
+  friend std::ostream& operator<<(std::ostream &out, const feature &x);
+
+  feature(char ftype, const char *str, int len):
     ftype_(ftype),
     len_(len),
     copy_(false)
@@ -63,16 +68,31 @@ public:
       str_ = strndup(str, len);
     } else {
       str_ = const_cast<char *>(str);
-    }      
+    }
   }
-#define UNUSED_ARGUMENT(x) (void)x
-  feature(int ftype, char *str, int len, bool copy):
+  
+  // quiet g++
+  #define UNUSED_ARGUMENT(x) (void)x
+
+  feature(char ftype, const char *str, int len, bool copy):
     ftype_(ftype),
     len_(len),
     copy_(true)
   {
     UNUSED_ARGUMENT(copy);
     str_ = strndup(str, len);
+  }
+
+  feature(const feature &a):
+    ftype_(a.ftype_),
+    len_(a.len_),
+    copy_(a.copy_)
+  {
+    if (copy_) {
+      str_ = strndup(a.str_, a.len_);
+    } else {
+      str_ = const_cast<char *>(a.str_);
+    }
   }
   
   ~feature()
