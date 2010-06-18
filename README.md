@@ -6,17 +6,17 @@ Micter's learning algorithm is Support Vector Machine with L1 regularization. Op
 
 ## How to build
 
-You need g++ 4.1 or higher to build micter. And then you should type
-
  $ make
 
+You need g++ 4.1 or higher to build micter for now.
 
 ## How to use
 
-./micter-train -m modelfile.txt learndata1.txt learndata2.txt ...
-./micter -m modelfile.txt
-type some sentence here.
+    ./micter-train -m modelfile.txt learndata1.txt learndata2.txt ...
+    ./micter -m modelfile.txt
+    type some sentence here.
 
 ## learning data format
 
 1 word in 1 line. empty line is treated as a sentence break.
+
