@@ -63,7 +63,7 @@ static void proc_stdin(micter::micter &mic)
 
 static void proc_file(micter::micter &mic, const string &filename)
 {
-  ifstream ifs(filename);
+  ifstream ifs(filename.c_str());
   proc(mic, ifs);
 }
 

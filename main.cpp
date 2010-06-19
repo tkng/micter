@@ -95,7 +95,7 @@ static void proc_stdin(micter::micter &mic, bool bench_mode)
 
 static void proc_file(micter::micter &mic, const string &filename, bool bench_mode)
 {
-  ifstream ifs(filename);
+  ifstream ifs(filename.c_str());
   proc(mic, ifs, bench_mode);
 }
 
