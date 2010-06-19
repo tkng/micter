@@ -104,7 +104,12 @@ namespace micter {
         uit->second = exampleN;
         
         unordered_map<feature, float>::iterator wit = w.find(key);
-        wit->second = clip_by_zero(wit->second, lambda * c);
+        float newv = clip_by_zero(wit->second, lambda * c);
+        if (fabsf(newv) < lambda) {
+          w.erase(wit);
+        } else {
+          wit->second = newv;
+        }
       } else {
         int c = exampleN;
         feature key_ = feature(key.ftype_, key.str_, key.len_, true);
@@ -122,6 +127,24 @@ namespace micter {
       
       l1_regularize(fv);
     }
+
+    if (exampleN % 1000 == 0) {
+      unordered_map<feature, float>::iterator it;
+      for (it = w.begin(); it != w.end(); it++) {
+        feature key = it->first;
+        if (last_update.find(key) != last_update.end()) {
+          int c = exampleN - last_update[key];
+          last_update[key] = exampleN;
+          float newv = clip_by_zero(it->second, lambda * c);
+          if (fabsf(newv) < lambda) {
+            w.erase(it);
+          } else {
+            it->second = newv;
+          }
+        }
+      }
+    }
+
     exampleN++;
   }
 
