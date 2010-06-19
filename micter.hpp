@@ -25,11 +25,6 @@
 
 #include "util.hpp"
 
-// References
-
-// - Cumulative Regularization Term Update
-// [] Y. Tsuruoka, J. Tsujii, S. Ananiadou, "Stochastic Gradient Descent Training for L1-regularized Log-Linear Models with Cumulative Penalty", ACL 2009
-
 namespace micter
 {
   typedef std::vector<std::pair<feature, double> > fv_t;
