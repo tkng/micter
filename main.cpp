@@ -18,8 +18,8 @@
  */
 
 #include "micter.hpp"
-#include "cmdline.h"
 #include "util.hpp"
+#include "cmdline.h"
 
 #include <iostream>
 #include <fstream>

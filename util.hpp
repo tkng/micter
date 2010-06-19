@@ -38,8 +38,11 @@ string_join(const std::vector<std::string> &ss);
 std::vector<std::string>
 string_to_chars(const std::string &s);
 
+std::vector<std::string>
+string_split_at(const std::string &s, const std::vector<size_t> &cut_poss, const std::vector<size_t> &poss);
+
 // return start positions of each character.
-std::vector<std::size_t>
+std::vector<size_t>
 string_start_poss(const std::string &s);
 
 size_t

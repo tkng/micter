@@ -102,6 +102,38 @@ string_to_chars(const string &s)
   return chars;
 }
 
+
+vector<string>
+string_split_at(const string &s, const vector<size_t> &cut_poss, const vector<size_t> &poss)
+{
+  vector<string> words;
+  size_t i = 0;
+  size_t j = 0;
+  
+  vector<size_t>::const_iterator cit = cut_poss.begin();
+  
+  while (cit != cut_poss.end()) {
+    j = *cit;
+    if (i < j) {
+      size_t spos = poss[i];
+      size_t epos = poss[j] - poss[i];
+      string word = s.substr(spos, epos);
+      words.push_back(word);
+    }
+    i = j;
+    cit++;
+  }
+  
+  if (j < poss.size()) {
+    size_t spos = poss[i];
+    size_t epos = poss.back();
+    string word = s.substr(spos, epos-spos);
+    words.push_back(word);
+  }
+  
+  return words;
+}
+
 vector<size_t>
 string_start_poss(const string &s)
 {

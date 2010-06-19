@@ -104,12 +104,7 @@ namespace micter {
         uit->second = exampleN;
         
         unordered_map<feature, float>::iterator wit = w.find(key);
-        float newv = clip_by_zero(wit->second, lambda * c);
-        if (fabsf(newv) < lambda) {
-          w.erase(wit);
-        } else {
-          wit->second = newv;
-        }
+        wit->second = clip_by_zero(wit->second, lambda * c);
       } else {
         int c = exampleN;
         feature key_ = feature(key.ftype_, key.str_, key.len_, true);
@@ -128,7 +123,7 @@ namespace micter {
       l1_regularize(fv);
     }
 
-    if (exampleN % 1000 == 0) {
+    if (exampleN % 500000 == 0) {
       unordered_map<feature, float>::iterator it;
       for (it = w.begin(); it != w.end(); it++) {
         feature key = it->first;
@@ -391,50 +386,25 @@ namespace micter {
     return fv;
   }
 
-  vector<string>
-  chars_to_words(const vector<string> &chars, vector<int> &cut_pos) {
-    vector<string> words;
-    size_t i = 0;
-    size_t j = 0;
-
-    while (cut_pos.size() > 0) {
-      j = cut_pos[0];
-      if (i < j) {
-        string word = string_join(vector<string>(chars.begin() + i, chars.begin() + j));
-        words.push_back(word);
-      }
-      
-      i = j;
-      cut_pos.erase(cut_pos.begin());
-    }
-
-    if (j < chars.size()) {
-      string word = string_join(vector<string>(chars.begin() + j, chars.begin()+chars.size()));
-      words.push_back(word);
-    }
-
-    return words;
-  }
-
   int micter::split(const string &line, vector<string> *result) {
-    vector<string> chars = string_to_chars(line);
+    vector<string> chars;// = string_to_chars(line);
     vector<char> char_types; // = chars_to_types(chars);
     vector<size_t> positions = string_start_poss(line);
     // FIXME: use smart pointer for Exception Safety.
     char *str = strdup(line.c_str());
 
-    vector<int> cut_pos;
+    vector<size_t> cut_poss;
 
     size_t cs_size = positions.size()-1;
     for (size_t i = 0; i < cs_size; i++) {
       fv_t fv = generate_fv(str, positions, char_types, i);
       if (svm.dotproduct(fv) >= 0.0) {
-        cut_pos.push_back(i);
+        cut_poss.push_back(i);
       }
     }
     
     free(str);
-    vector<string> tmp = chars_to_words(chars, cut_pos);
+    vector<string> tmp = string_split_at(line, cut_poss, positions);
     *result = tmp;
     return 0;
   }
