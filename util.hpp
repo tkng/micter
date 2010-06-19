@@ -21,9 +21,11 @@
 
 #include <cstring>
 
+#include <stdlib.h>
+#include <limits.h>
+
 #include <string>
 #include <vector>
-#include <limits.h>
 #include <iostream>
 #include <fstream>
 #include <ostream>
