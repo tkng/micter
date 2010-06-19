@@ -143,3 +143,18 @@ struct feature_hash
   }
   
 };
+
+class feature_iterator
+{
+  size_t i;
+  const char *str_;
+  const std::vector<size_t> &sposs_;
+  size_t n_;
+  feature_iterator(const char *str, const std::vector<size_t> &sposs, size_t n):
+    i(0), str_(str), sposs_(sposs_), n_(n) {}
+
+  size_t
+  size() {
+    return 3;
+  }
+};
