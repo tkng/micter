@@ -6,17 +6,30 @@ Micter's learning algorithm is Support Vector Machine with L1 regularization. Op
 
 ## How to build
 
- $ make
+    ./waf configure
+    ./waf build
 
-You need g++ 4.1 or higher to build micter for now.
+You need python and g++ 4.1 or higher to build micter for now.
 
 ## How to use
 
-    ./micter-train -m modelfile.txt learndata1.txt learndata2.txt ...
-    ./micter -m modelfile.txt
+    ./build/default/micter-train -m modelfile.txt learndata1.txt learndata2.txt ...
+    ./build/default/micter -m modelfile.txt
     type some sentence here.
+
+micter has benchmark mode. 
+
+    ./build/default/micter --bench -m modelfile.txt learndata1.txt
+
+will output accuracy, precision and recall of closed test.
 
 ## learning data format
 
 1 word in 1 line. empty line is treated as a sentence break.
+
+## TODO
+
+* throw exception when error occured.
+* strict parsing of model file.
+* implement feature vector iterator.
 
