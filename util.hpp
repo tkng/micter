@@ -58,15 +58,15 @@ private:
 
 public:
   char *str_;
-  char ftype_;
   size_t len_;
+  char ftype_;
   bool copy_;
 
   friend std::ostream& operator<<(std::ostream &out, const feature &x);
 
   feature(char ftype, const char *str, int len):
-    ftype_(ftype),
     len_(len),
+    ftype_(ftype),
     copy_(false)
   {
     if (copy_) {
@@ -80,8 +80,8 @@ public:
   #define UNUSED_ARGUMENT(x) (void)x
 
   feature(char ftype, const char *str, int len, bool copy):
-    ftype_(ftype),
     len_(len),
+    ftype_(ftype),
     copy_(true)
   {
     UNUSED_ARGUMENT(copy);
@@ -89,8 +89,8 @@ public:
   }
 
   feature(const feature &a):
-    ftype_(a.ftype_),
     len_(a.len_),
+    ftype_(a.ftype_),
     copy_(a.copy_)
   {
     if (copy_) {
@@ -134,6 +134,7 @@ struct feature_hash
     
     size_t __result = static_cast<size_t>(2166136261UL);
     __result ^= static_cast<size_t>(val.ftype_);
+    //    __result += static_cast<size_t>(val.ftype_ << 8);
     __result *= static_cast<size_t>(16777619UL);
     
     for (; __length > 0; --__length)

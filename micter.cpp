@@ -143,6 +143,12 @@ namespace micter {
     exampleN++;
   }
 
+  static char parse_ftype(char a1, char a0) {
+    int d1 = a1 - 0x30;
+    int d0 = a0 - 0x30;
+    return d1 * 16 + d0;
+  }
+
   int SVM::load(const char *filename) {
     ifstream ifs(filename);
     if (!ifs) {
@@ -156,7 +162,9 @@ namespace micter {
       double val = strtod(a[1].c_str(), NULL);
       //      cout << line << " " <<a[0] << endl;
       //      cout << line[0] << a[0].substr(1).c_str() << " " << a[0].size() -1<< endl;
-      feature f(line[0], a[0].substr(1).c_str(), a[0].size() -1, true);
+      char ftype = parse_ftype(line[0], line[1]);
+      //      cout << hex << ftype << endl;
+      feature f(ftype, a[0].substr(2).c_str(), a[0].size() -2, true);
       w[f] = val;
     }
     return 0;
@@ -200,19 +208,17 @@ namespace micter {
     return cuts;
   }
   
-  const char feature_prefix[] = {'a', 'b', 'c', 'd', 'e', 'f'};
-  
-  bool is_numeric(const string &a) {
-    if (a[0] >= '0' && a[0] <= '9') {
+  bool is_numeric(const string &a, size_t pos) {
+    if (a[pos] >= '0' && a[pos] <= '9') {
       return true;
     }
     return false;
   }
 
-  bool is_hiragana(const string &a) {
-    unsigned char c1 = a[0];
-    unsigned char c2 = a[1];
-    unsigned char c3 = a[2];
+  bool is_hiragana(const string &a, size_t pos) {
+    unsigned char c1 = a[pos];
+    unsigned char c2 = a[pos+1];
+    unsigned char c3 = a[pos+2];
 
     if (c1 == 0xE3) {
       if (c2 == 0x81) {
@@ -226,10 +232,10 @@ namespace micter {
     return false;
   }
   
-  bool is_katakana(const string &a) {
-    unsigned char c1 = a[0];
-    unsigned char c2 = a[1];
-    unsigned char c3 = a[2];
+  bool is_katakana(const string &a, size_t pos) {
+    unsigned char c1 = a[pos];
+    unsigned char c2 = a[pos+1];
+    unsigned char c3 = a[pos+2];
 
     if (c1 == 0xE3) {
       if (c2 == 0x82) {
@@ -245,44 +251,42 @@ namespace micter {
     return false;
   }
 
-  bool is_symbol(const string &a) {
-    if (a == "、")
+  bool is_symbol(const string &a, size_t pos) {
+    // if (a == "、")
+    //   return true;
+    // if (a == "。")
+    //   return true;
+    // if (a == "！")
+    //   return true;
+    // if (a == "？")
+    //   return true;
+    if (a[pos] == ',')
       return true;
-    if (a == "。")
+    if (a[pos] == '.')
       return true;
-    if (a == "！")
+    if (a[pos] == '!')
       return true;
-    if (a == "？")
-      return true;
-    if (a == ",")
-      return true;
-    if (a == ".")
-      return true;
-    if (a == "!")
-      return true;
-    if (a == "?")
+    if (a[pos] == '?')
       return true;
     return false;
   }
 
   vector<char>
-  chars_to_types(const vector<string> &chars) {
+  gen_char_types(const string &chars, vector<size_t> &positions) {
     vector<char> ret;
-    //    vector<string>::iterator it = chars.begin();
-    //for (it = chars.begin(); it != chars.end(); it++) {
-    for (size_t i = 0; i < chars.size(); i++) {
-      string a = chars[i];
+    for (size_t i = 0; i < positions.size(); i++) {
       char c;
-      if (is_numeric(a)) {
-        c = '1';
-      } else if (is_hiragana(a)) {
-        c = '2';
-      } else if (is_katakana(a)) {
-        c = '3';
-      } else if (is_symbol(a)) {
-        c = '4';
+      size_t pos = positions[i];
+      if (is_numeric(chars, pos)) {
+        c = 0;
+      } else if (is_hiragana(chars, pos)) {
+        c = 1;
+      } else if (is_katakana(chars, pos)) {
+        c = 2;
+      } else if (is_symbol(chars, pos)) {
+        c = 3;
       } else {
-        c = '5';
+        c = 4;
       }
       ret.push_back(c);
     }
@@ -303,24 +307,23 @@ namespace micter {
     } else {
       end_pos = positions[center];
     }
-    feature f('A', str + start_pos, end_pos - start_pos);
+    feature f(static_cast<char>(5), str + start_pos, end_pos - start_pos);
 
     fv->push_back(make_pair(f, 1.0));
   }
 
   // // type = letter type like hiragana, katakana, alphabets.
-  // void
-  // generate_type_bigram_fv(const vector<char> &char_types, size_t center, fv_t *fv) {
-  //   string f = string("B");
-  //   if (center >= 2) {
-  //     f += char_types[center-2];
-  //   }
-  //   if (center >= 1) {
-  //     f += char_types[center-1];
-  //   }
-  //   f += char_types[center];
-  //   fv->push_back(make_pair(f, 1.0));
-  // }
+  void
+  generate_type_bigram_fv(const vector<char> &char_types, size_t center, fv_t *fv) {
+    char fnum = 5;
+    if (center >= 1) {
+      fnum += char_types[center-1];
+    }
+    fnum += char_types[center] * 5;
+    //    cout << static_cast<int>(fnum) << endl;
+    feature f(fnum, "", 0);
+    fv->push_back(make_pair(f, 1.0));
+  }
 
   // // type = letter type like hiragana, katakana, alphabets.
   // void
@@ -356,7 +359,7 @@ namespace micter {
       end_pos = positions[center];
     }
 
-    feature f('E', str + start_pos, end_pos - start_pos);
+    feature f(static_cast<char>(6), str + start_pos, end_pos - start_pos);
 
     fv->push_back(make_pair(f, 1.0));
   }
@@ -373,23 +376,22 @@ namespace micter {
       size_t start_pos, end_pos;
       start_pos = positions[i];
       end_pos = positions[i+1];
-      feature f(feature_prefix[j], str + start_pos, end_pos - start_pos);
+      feature f(static_cast<char>(j), str + start_pos, end_pos - start_pos);
       fv.push_back(make_pair(f, 1.0));
       j++;
     }
     generate_bigram_fv(str, positions, center, &fv);
     generate_trigram_fv(str, positions, center, &fv);
     //    generate_char_type_bigram_fv(chars, char_types, center, &fv);
-    //    generate_type_bigram_fv(char_types, center, &fv);
-    //    generate_trigram_fv(chars, center, &fv);
+    generate_type_bigram_fv(char_types, center, &fv);
 
     return fv;
   }
 
   int micter::split(const string &line, vector<string> *result) {
     vector<string> chars;// = string_to_chars(line);
-    vector<char> char_types; // = chars_to_types(chars);
     vector<size_t> positions = string_start_poss(line);
+    vector<char> char_types = gen_char_types(line, positions);
     // FIXME: use smart pointer for Exception Safety.
     char *str = strdup(line.c_str());
 
@@ -412,7 +414,7 @@ namespace micter {
   int micter::train_sentence(const vector<string> &words) {
     string sentence = string_join(words);
     vector<size_t> positions = string_start_poss(sentence);
-    vector<char> char_types;// = chars_to_types(chars);
+    vector<char> char_types = gen_char_types(sentence, positions);
     vector<size_t> cuts = calc_cut_pos(words);
     // FIXME: use smart pointer for Exception Safety.
     char *str = strdup(sentence.c_str());
@@ -447,10 +449,9 @@ namespace micter {
   int micter::test_sentence(const vector<string> &words,
                             int *tp, int *tn, int *fp, int *fn) {
     string sentence = string_join(words);
-    vector<string> chars;// = string_to_chars(sentence);
-    vector<char> char_types; // = chars_to_types(chars);
-    vector<size_t> cuts = calc_cut_pos(words);
     vector<size_t> positions = string_start_poss(sentence);
+    vector<char> char_types = gen_char_types(sentence, positions);
+    vector<size_t> cuts = calc_cut_pos(words);
     char *str = strdup(sentence.c_str());
 
     //    size_t cs_size = string_utf8_length(sentence);

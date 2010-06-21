@@ -177,8 +177,12 @@ string_utf8_length(const string &s)
   return len;
 }
 
+#include <iostream>
+
 ostream& operator<<(ostream &out, const feature &x)
 {
-  out << x.ftype_ << string(x.str_, x.len_);
+  out.width(2);
+  out.fill('0');
+  out << hex << x.ftype_ << string(x.str_, x.len_);
   return out;
 }
