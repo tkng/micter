@@ -29,6 +29,7 @@ using namespace std;
 static void set_cmdline(cmdline::parser &p)
 {
   p.add<string>("model", 'm', "model file (if exists, will be overwritten)", true);
+  p.add<size_t>("iterate", 'I', "iteration times", false, 3);
   p.add("help", 0, "print this message");
   p.footer("filename ...");
 }
@@ -89,13 +90,15 @@ int main(int argc, char *argv[])
     return -1;
   }
 
+  size_t times = p.get<int>("iterate");
+
   rest = p.rest();
 
   if (rest.size() == 0) {
     proc_stdin(mic);
   }
   else {
-    for (int i = 0; i < 3; i++) {
+    for (size_t i = 0; i < times; i++) {
       vector<string>::iterator it;
       for (it = rest.begin(); it != rest.end(); it++) {
         proc_file(mic, *it);
