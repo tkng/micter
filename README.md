@@ -13,11 +13,17 @@ You need python and g++ 4.1 or higher to build micter for now.
 
 ## How to use
 
-    ./build/default/micter-train -m modelfile.txt learndata1.txt learndata2.txt ...
-    ./build/default/micter -m modelfile.txt
+    $ ./build/default/micter-train -m modelfile.txt learndata1.txt learndata2.txt ...
+    $ ./build/default/micter -m modelfile.txt
     type some sentence here.
 
-micter has benchmark mode. 
+### there is a model file learned with japanese blog data.
+
+    $ wget http://kodou.net/~tkng/micter/micter.model
+    $ ./build/default/micter -m micter.model
+    type some japanese sentence here.
+
+### micter has a benchmark mode. 
 
     ./build/default/micter --bench -m modelfile.txt learndata1.txt
 
@@ -29,7 +35,7 @@ will output accuracy, precision and recall of closed test.
 
 ## Performance Test
 
-test data: crowled Japanese blogs entries (roughly 250MB for train, 250MB for test. character encoding is UTF-8.)
+test data: crowled Japanese blog entries (roughly 250MB for train, 250MB for test. character encoding is UTF-8.)
 
 train data and test data is splitted with mecab.
 
