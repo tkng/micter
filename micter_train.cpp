@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  size_t times = p.get<int>("iterate");
+  size_t times = p.get<size_t>("iterate");
 
   rest = p.rest();
 
