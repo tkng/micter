@@ -183,6 +183,6 @@ ostream& operator<<(ostream &out, const feature &x)
 {
   out.width(2);
   out.fill('0');
-  out << hex << x.ftype_ << string(x.str_, x.len_);
+  out << hex << static_cast<int>(x.ftype_) << string(x.str_, x.len_);
   return out;
 }
