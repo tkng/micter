@@ -27,9 +27,25 @@ will output accuracy, precision and recall of closed test.
 
 1 word in 1 line. empty line is treated as a sentence break.
 
+## Performance Test
+
+test data: crowled Japanese blogs entries (roughly 250MB for train, 250MB for test. character encoding is UTF-8.)
+
+train data and test data is splitted with mecab.
+
+### open test (tested with train data):
+
+    accuracy:  0.941353
+    precision: 0.976557
+    recall:    0.913756
+
+### closed test:
+
+    accuracy:  0.942232
+    precision: 0.977311
+    recall:    0.914956
+
 ## TODO
 
-* throw exception when error occured.
-* strict parsing of model file.
+* strict parsing of model file (current implemantation is not robust).
 * implement feature vector iterator.
-
