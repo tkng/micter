@@ -107,16 +107,11 @@ public:
     }
   }
   
-};
-
-
-struct feature_equal_to
-{
   bool
-  operator()(const feature x, const feature y) const
+  operator==(const feature x) const
   {
-    if (x.ftype_ == y.ftype_ && x.len_ == y.len_) {
-      if (memcmp(x.str_, y.str_, x.len_) == 0) {
+    if (x.ftype_ == ftype_ && x.len_ == len_) {
+      if (memcmp(x.str_, str_, x.len_) == 0) {
         return true;
       }
     }
@@ -124,28 +119,39 @@ struct feature_equal_to
   }
 };
 
-struct feature_hash
-{
-  size_t
-  operator()(feature val) const
-  {
-    size_t __length = val.len_;
-    const char *__first = val.str_;
+
+
+namespace std {
+  namespace tr1 {
     
-    size_t __result = static_cast<size_t>(2166136261UL);
-    __result ^= static_cast<size_t>(val.ftype_);
-    //    __result += static_cast<size_t>(val.ftype_ << 8);
-    __result *= static_cast<size_t>(16777619UL);
+    template<class T>
+    struct hash {
+    };
     
-    for (; __length > 0; --__length)
+    template <>
+    struct hash<feature>
+    {
+      size_t
+      operator()(feature val) const
       {
-        __result ^= static_cast<size_t>(*__first++);
+        size_t __length = val.len_;
+        const char *__first = val.str_;
+        
+        size_t __result = static_cast<size_t>(2166136261UL);
+        __result ^= static_cast<size_t>(val.ftype_);
+        //    __result += static_cast<size_t>(val.ftype_ << 8);
         __result *= static_cast<size_t>(16777619UL);
+        
+        for (; __length > 0; --__length)
+          {
+            __result ^= static_cast<size_t>(*__first++);
+            __result *= static_cast<size_t>(16777619UL);
+          }
+        return __result;
       }
-    return __result;
+    };
   }
-  
-};
+}
 
 class feature_iterator
 {
