@@ -114,7 +114,7 @@ namespace micter {
     }
   }
   
-  void SVM::trainExample(const fv_t &fv, const int y) {
+  void SVM::train_example(const fv_t &fv, const int y) {
     //    b = + 10.0;
 
     if (margin(fv, y) < 1.0) {

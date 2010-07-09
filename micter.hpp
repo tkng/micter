@@ -57,7 +57,7 @@ namespace micter
     // save model
     int save(const char *filename);
     
-    void trainExample(const fv_t& fv, const int y);
+    void train_example(const fv_t& fv, const int y);
   };
 
   class micter {
