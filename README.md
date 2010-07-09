@@ -39,13 +39,13 @@ test data: crowled Japanese blog entries (roughly 250MB for train, 250MB for tes
 
 train data and test data is splitted with mecab.
 
-### open test (tested with train data):
+### open test:
 
     accuracy:  0.941353
     precision: 0.976557
     recall:    0.913756
 
-### closed test:
+### closed test (test with train data):
 
     accuracy:  0.942232
     precision: 0.977311
