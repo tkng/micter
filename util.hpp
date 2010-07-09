@@ -30,6 +30,8 @@
 #include <fstream>
 #include <ostream>
 
+#include <tr1/unordered_map>
+
 int
 string_split(const std::string &s, const char needle, int max_num,
              std::vector<std::string> *result);
@@ -123,10 +125,6 @@ public:
 
 namespace std {
   namespace tr1 {
-    
-    template<class T>
-    struct hash {
-    };
     
     template <>
     struct hash<feature>

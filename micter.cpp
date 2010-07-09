@@ -440,7 +440,7 @@ namespace micter {
       // }
       // cout << endl;
 
-      svm.trainExample(fv, y);
+      svm.train_example(fv, y);
     }
     free(str);
     return 0;

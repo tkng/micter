@@ -33,8 +33,8 @@ namespace micter
   // Training algorithm is FOBOS.
   class SVM {
   private:
-    std::tr1::unordered_map<feature, float, feature_hash, feature_equal_to> w;
-    std::tr1::unordered_map<feature, int, feature_hash, feature_equal_to> last_update;
+    std::tr1::unordered_map<feature, float> w;
+    std::tr1::unordered_map<feature, int> last_update;
 
     float clip_by_zero(float a, float b) const;
     void muladd(const fv_t &fv, const int y, float scale);
