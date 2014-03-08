@@ -27,7 +27,6 @@
 #include <iomanip>
 
 using namespace std;
-using namespace tr1;
 
 namespace micter {
 

@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <string>
-#include <tr1/unordered_map>
 
 #include "util.hpp"
 
@@ -33,8 +32,8 @@ namespace micter
   // Training algorithm is FOBOS.
   class SVM {
   private:
-    std::tr1::unordered_map<feature, float> w;
-    std::tr1::unordered_map<feature, int> last_update;
+    std::unordered_map<feature, float> w;
+    std::unordered_map<feature, int> last_update;
 
     float clip_by_zero(float a, float b) const;
     void muladd(const fv_t &fv, const int y, float scale);
