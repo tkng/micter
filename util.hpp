@@ -30,7 +30,19 @@
 #include <fstream>
 #include <ostream>
 
+#if defined(__APPLE__)
+#include <AvailabilityMacros.h>
+#endif
+
+#if defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_9) && \
+  MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
+#include <unordered_map>
+#else
 #include <tr1/unordered_map>
+namespace std {
+using tr1::unordered_map;
+} // namespace std
+#endif
 
 int
 string_split(const std::string &s, const char needle, int max_num,
@@ -124,31 +136,36 @@ public:
 
 
 namespace std {
+#if !defined(__APPLE__) || !defined(MAC_OS_X_VERSION_10_9) || \
+  MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
   namespace tr1 {
-    
-    template <>
-    struct hash<feature>
+#endif
+  template <>
+  struct hash<feature>
+  {
+    size_t
+    operator()(feature val) const
     {
-      size_t
-      operator()(feature val) const
-      {
-        size_t __length = val.len_;
-        const char *__first = val.str_;
-        
-        size_t __result = static_cast<size_t>(2166136261UL);
-        __result ^= static_cast<size_t>(val.ftype_);
-        //    __result += static_cast<size_t>(val.ftype_ << 8);
-        __result *= static_cast<size_t>(16777619UL);
-        
-        for (; __length > 0; --__length)
-          {
-            __result ^= static_cast<size_t>(*__first++);
-            __result *= static_cast<size_t>(16777619UL);
-          }
-        return __result;
-      }
-    };
+      size_t __length = val.len_;
+      const char *__first = val.str_;
+
+      size_t __result = static_cast<size_t>(2166136261UL);
+      __result ^= static_cast<size_t>(val.ftype_);
+      //    __result += static_cast<size_t>(val.ftype_ << 8);
+      __result *= static_cast<size_t>(16777619UL);
+
+      for (; __length > 0; --__length)
+        {
+          __result ^= static_cast<size_t>(*__first++);
+          __result *= static_cast<size_t>(16777619UL);
+        }
+      return __result;
+    }
+  };
+#if !defined(__APPLE__) || !defined(MAC_OS_X_VERSION_10_9) || \
+  MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
   }
+#endif
 }
 
 class feature_iterator
